@@ -5,32 +5,25 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.AppOpsManager;
-import android.app.usage.NetworkStats;
-import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.icu.util.Calendar;
-import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.TextView;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import androidx.annotation.RequiresApi;
 
 import network.traffic.monitor.R;
-import network.traffic.monitor.model.FileSize;
+import network.traffic.monitor.model.NetworkTrafficOneMonth;
+import network.traffic.monitor.util.MyBarNameFormatter;
+import network.traffic.monitor.util.MyValueFormatter;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
@@ -39,23 +32,20 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 
 public class MainActivity extends AppCompatActivity {
-
-    TextView tvAllTraffic;
+    TextView tvMonth, tvAllTraffic;
     private HorizontalBarChart horizontalChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        tvMonth = findViewById(R.id.tvMonthName);
         tvAllTraffic = findViewById(R.id.tvAllTraffic);
-
         horizontalChart = findViewById(R.id.horizontalChart);
     }
 
@@ -97,9 +87,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean hasPermissionToReadNetworkHistory() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
         final AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
         int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS,
                 android.os.Process.myUid(), getPackageName());
@@ -141,108 +128,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNetworkStatistics(){
-        NetworkStatsManager networkStatsManager = (NetworkStatsManager) getApplicationContext().getSystemService(Context.NETWORK_STATS_SERVICE);
-        NetworkStats.Bucket bucket;
-        long mobileRxTx = 0, wifiRxTx = 0, tetheringRxTx = 0, allRxTx;
+        // get network traffic statistics
+        NetworkTrafficOneMonth thisMonthTraffic = new NetworkTrafficOneMonth(MainActivity.this, getTimesMonthMorning(), System.currentTimeMillis());
 
-        // get network statistics
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            //mobile traffic
-            try {
-                //for device summary, SubscriberId must be null
-                bucket = networkStatsManager.querySummaryForDevice(NetworkCapabilities.TRANSPORT_CELLULAR,
-                        getSubscriberId(MainActivity.this),
-                        getTimesMonthMorning(),
-                        System.currentTimeMillis());
-                mobileRxTx = bucket.getRxBytes() + bucket.getTxBytes();
-//                Log.i("Info", "Mobile RX: " + (bucket.getRxBytes() + "Mobile TX: " +  bucket.getTxBytes()));
-            } catch (RemoteException e) {
-                System.out.println("mobile remote exp-1");
-            }
-
-            //wifi traffic
-            try {
-                bucket = networkStatsManager.querySummaryForDevice(NetworkCapabilities.TRANSPORT_WIFI,
-                        "",
-                        getTimesMonthMorning(),
-                        System.currentTimeMillis());
-
-                wifiRxTx = bucket.getRxBytes() + bucket.getTxBytes();
-            } catch (RemoteException e) {
-                System.out.println("wifi remote exp-1");
-            }
-
-            //tethering traffic
-            NetworkStats networkStats;
-            try{
-                networkStats = networkStatsManager.queryDetailsForUid(NetworkCapabilities.TRANSPORT_CELLULAR,
-                        getSubscriberId(MainActivity.this),
-                        getTimesMonthMorning(),
-                        System.currentTimeMillis(),
-                        android.app.usage.NetworkStats.Bucket.UID_TETHERING);
-                bucket = new NetworkStats.Bucket();
-                while (networkStats.hasNextBucket()) {
-                    networkStats.getNextBucket(bucket);
-                    tetheringRxTx += bucket.getRxBytes() + bucket.getTxBytes();
-//                    Log.i("Info", "tetheringBytes: " + tetheringRxTx);
-                }
-                networkStats.close();
-            } catch (Exception e) {
-                System.out.println("tethering remote exp-1");
-            }
-        }
-        // Android Ver. < M
-        else {
-            try {
-                bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_MOBILE,
-                        getSubscriberId(MainActivity.this),
-                        getTimesMonthMorning(),
-                        System.currentTimeMillis());
-                mobileRxTx = bucket.getRxBytes() + bucket.getTxBytes();
-            } catch (RemoteException e) {
-                System.out.println("mobile remote exp-1");
-            }
-            try {
-                bucket = networkStatsManager.querySummaryForDevice(ConnectivityManager.TYPE_WIFI,
-                        "",
-                        getTimesMonthMorning(),
-                        System.currentTimeMillis());
-
-                wifiRxTx = bucket.getRxBytes() + bucket.getTxBytes();
-            } catch (RemoteException e) {
-                System.out.println("wifi remote exp-1");
-            }
-            //tethering traffic
-            NetworkStats networkStats;
-            try{
-                networkStats = networkStatsManager.queryDetailsForUid(ConnectivityManager.TYPE_MOBILE,
-                        getSubscriberId(MainActivity.this),
-                        getTimesMonthMorning(),
-                        System.currentTimeMillis(),
-                        android.app.usage.NetworkStats.Bucket.UID_TETHERING);
-                bucket = new NetworkStats.Bucket();
-                while (networkStats.hasNextBucket()) {
-                    networkStats.getNextBucket(bucket);
-                    tetheringRxTx += bucket.getRxBytes() + bucket.getTxBytes();
-//                    Log.i("Info", "tetheringBytes: " + tetheringRxTx);
-                }
-                networkStats.close();
-            } catch (Exception e) {
-                System.out.println("tethering remote exp-1");
-            }
-        }
-
-        allRxTx = mobileRxTx + wifiRxTx + tetheringRxTx;
-
-        //show by text
-        tvAllTraffic.setText( getRoundedValueForView(allRxTx) );
-
-        //show by chart
-        initHBarChart(tetheringRxTx, wifiRxTx, mobileRxTx);
+        // display network traffic statistics
+        tvMonth.setText(thisMonthTraffic.getMonth());
+        tvAllTraffic.setText( MyValueFormatter.getRoundedValueForView(thisMonthTraffic.getTotalTraffic()));
+        initHBarChart(thisMonthTraffic.getTetheringTraffic(), thisMonthTraffic.getWiFiTraffic(), thisMonthTraffic.getMobileTraffic());
     }
 
     private void setBarDataSet(final ArrayList<BarEntry> entryValue, final ArrayList<BarEntry> entryName, String[] networkType) {
-
         // set distance between bars // note: (barWidth+barSpace)*2+groupSpace = 1.0
         float fromX = 0f;
         float barWidth = 0.18f;
@@ -262,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         // set presentation style at the 'top' of bars
         barDataSet.setValueFormatter(new ValueFormatter() {
             public String getFormattedValue(float value) {
-                return getRoundedValueForView( (long) value );
+                return MyValueFormatter.getRoundedValueForView( (long) value );
             }
         });
 
@@ -278,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         barData.setDrawValues(true);
         barData.setBarWidth(barWidth);
 
-        // display types of network traffics
+        // display types of network traffics beneath bars
 //        IndexAxisValueFormatter formatter = new IndexAxisValueFormatter(new String[]{"","",""});
 //        horizontalChart.getXAxis().setValueFormatter(formatter);
 
@@ -353,65 +248,24 @@ public class MainActivity extends AppCompatActivity {
         final String[] networkType = new String[]{"WiFi", "Tethering", "Mobile"};
 
         ArrayList<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0f, Float.valueOf(wifiRxTx)));
-        entries.add(new BarEntry(1f, Float.valueOf(tetheringRxTx)));
-        entries.add(new BarEntry(2f, Float.valueOf(mobileRxTx)));
+        entries.add(new BarEntry(0f, wifiRxTx));
+        entries.add(new BarEntry(1f, tetheringRxTx));
+        entries.add(new BarEntry(2f, mobileRxTx));
 
         ArrayList<BarEntry> entryName = new ArrayList<>();
-        entryName.add(new BarEntry(0f, 0.1f));
-        entryName.add(new BarEntry(1f, 0.2f));
-        entryName.add(new BarEntry(2f, 0.3f));
+        entryName.add(new BarEntry(0f, MyBarNameFormatter.WiFi));
+        entryName.add(new BarEntry(1f, MyBarNameFormatter.Tethering));
+        entryName.add(new BarEntry(2f, MyBarNameFormatter.Mobile));
 
         setBarDataSet(entries, entryName, networkType);
     }
 
     // for display bar name 'above' a bar
     private String getNetworkName(float value){
-        if(value==0.1f) return "WiFi";
-        if(value==0.2f) return "Tethering";
-        if(value==0.3f) return "Mobile";
+        if(value== MyBarNameFormatter.WiFi) return "WiFi";
+        if(value== MyBarNameFormatter.Tethering) return "Tethering";
+        if(value== MyBarNameFormatter.Mobile) return "Mobile";
         return "";
-    }
-
-    private String getRoundedValueForView(long value){
-        String text="";
-        DecimalFormat df = new DecimalFormat("###.00");
-        if(value >= FileSize.sizeOfGB){
-            text = df.format(value/FileSize.sizeOfGB)+" GB";
-        } else if (value < FileSize.sizeOfGB && value >= FileSize.sizeOfMB){
-            text = df.format(value/FileSize.sizeOfMB)+" MB";
-        } else if (value < FileSize.sizeOfMB && value >= FileSize.sizeOfKB){
-            text = df.format(value/FileSize.sizeOfKB)+" KB";
-        } else {
-            text = value+" bytes";
-        }
-        return text;
-    }
-
-    private String getSubscriberId(Context context) {
-        String deviceId = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            deviceId = null;
-        } else {
-            // request old storage permission
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return null;
-            }
-            try {
-                TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-                deviceId = tm.getSubscriberId();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return deviceId;
     }
 
     private static long getTimesMonthMorning() {
