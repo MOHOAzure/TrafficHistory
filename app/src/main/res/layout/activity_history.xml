@@ -6,11 +6,187 @@
     android:layout_height="match_parent"
     tools:context="network.traffic.monitor.controller.HistoryActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="89dp"
-        tools:layout_editor_absoluteY="89dp" />
+
+    <TableLayout
+        android:id="@+id/TableLayoutText"
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TableRow
+            android:id="@+id/tableTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tvDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="N Months"
+                android:textAlignment="center"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tableTitleAllNetworkTypes"
+                android:layout_width="135dp"
+                android:layout_height="wrap_content"
+                android:text="All networks"
+                android:textAlignment="textEnd"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tableTitleMTNetworkTypes"
+                android:layout_width="135dp"
+                android:layout_height="wrap_content"
+                android:text="Mobile+Tethering"
+                android:textAlignment="textEnd"
+                android:textSize="14sp" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/rowAVG"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textAVG"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="AVG"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="66dp" />
+
+            <TextView
+                android:id="@+id/tvAVGAllNetworkTypes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/default_value"
+                android:textAlignment="textEnd"
+                android:textSize="18sp"
+                app:layout_constraintStart_toEndOf="@+id/textAVG"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvAVGMTNetworkTypes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/default_value"
+                android:textAlignment="textEnd"
+                android:textSize="18sp"
+                app:layout_constraintStart_toEndOf="@+id/textAVG"
+                app:layout_constraintTop_toTopOf="parent" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/rowMax"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textMax"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="MAX"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="66dp" />
+
+            <TextView
+                android:id="@+id/tvMaxAllNetworkTypes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/default_value"
+                android:textAlignment="textEnd"
+                android:textSize="18sp"
+                app:layout_constraintStart_toEndOf="@+id/textAVG"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvMaxMTNetworkTypes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/default_value"
+                android:textAlignment="textEnd"
+                android:textSize="18sp"
+                app:layout_constraintStart_toEndOf="@+id/textAVG"
+                app:layout_constraintTop_toTopOf="parent" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/rowMin"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textMin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="MIN"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="66dp" />
+
+            <TextView
+                android:id="@+id/tvMinAllNetworkTypes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/default_value"
+                android:textAlignment="textEnd"
+                android:textSize="18sp"
+                app:layout_constraintStart_toEndOf="@+id/textAVG"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvMinMTNetworkTypes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/default_value"
+                android:textAlignment="textEnd"
+                android:textSize="18sp"
+                app:layout_constraintStart_toEndOf="@+id/textAVG"
+                app:layout_constraintTop_toTopOf="parent" />
+        </TableRow>
+
+    </TableLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayoutLineChart"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TableLayoutText">
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

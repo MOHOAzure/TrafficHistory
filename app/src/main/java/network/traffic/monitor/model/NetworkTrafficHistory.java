@@ -1,5 +1,6 @@
 package network.traffic.monitor.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkTrafficHistory {
@@ -7,13 +8,29 @@ public class NetworkTrafficHistory {
     private long totalTrafficAvg, totalTrafficMax, totalTrafficMin;
     private String totalTrafficMaxMonth, totalTrafficMinMonth;
 
-    public NetworkTrafficHistory(){
+    private long MTTrafficAvg, MTTrafficMax, MTTrafficMin;
+    private String MTTrafficMaxMonth, MTTrafficMinMonth;
 
+    public NetworkTrafficHistory(){
+        this.history = new ArrayList<>();
+        this.MTTrafficAvg = 0;
+        this.MTTrafficMax = 0;
+        this.MTTrafficMin = 0;
+        this.MTTrafficMaxMonth = "";
+
+        this.totalTrafficAvg = 0;
+        this.totalTrafficMax = 0;
+        this.totalTrafficMin = 0;
+        this.totalTrafficMaxMonth = "";
+        this.totalTrafficMinMonth = "";
+    }
+
+    public void add(NetworkTrafficOneMonth aMonth){
+        this.history.add(aMonth);
     }
 
     public List<NetworkTrafficOneMonth> getHistory(){
-        List<NetworkTrafficOneMonth> listHistory = null;
-        return listHistory;
+        return this.history;
     }
 
     public void setTotalTrafficAvg(long value){
@@ -37,27 +54,62 @@ public class NetworkTrafficHistory {
     }
 
     public long getTotalTrafficAvg(){
-        long traffic = 0;
-        return traffic;
+        return this.totalTrafficAvg;
     }
 
     public long getTotalTrafficMax(){
-        long traffic = 0;
-        return traffic;
+        return this.totalTrafficMax;
     }
 
     public long getTotalTrafficMin(){
-        long traffic = 0;
-        return traffic;
+        return this.totalTrafficMin;
     }
 
     public String getTotalTrafficMaxMonth(){
-        String month="";
-        return month;
+        return this.totalTrafficMaxMonth;
     }
 
     public String getTotalTrafficMinMonth(){
-        String month="";
-        return month;
+        return this.totalTrafficMinMonth;
+    }
+
+    public void setMTTrafficAvg(long value){
+        MTTrafficAvg = value;
+    }
+
+    public void setMTTrafficMax(long value){
+        MTTrafficMax = value;
+    }
+
+    public void setMTTrafficMin(long value){
+        MTTrafficMin = value;
+    }
+
+    public void setMTTrafficMaxMonth(String month){
+        MTTrafficMaxMonth=month;
+    }
+
+    public void setMTTrafficMinMonth(String month){
+        MTTrafficMinMonth=month;
+    }
+
+    public long getMTTrafficAvg(){
+        return this.MTTrafficAvg;
+    }
+
+    public long getMTTrafficMax(){
+        return this.MTTrafficMax;
+    }
+
+    public long getMTTrafficMin(){
+        return this.MTTrafficMin;
+    }
+
+    public String getMTTrafficMaxMonth(){
+        return this.MTTrafficMaxMonth;
+    }
+
+    public String getMTTrafficMinMonth(){
+        return this.MTTrafficMinMonth;
     }
 }

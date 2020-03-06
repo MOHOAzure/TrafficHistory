@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">TrafficHistory</string>
     <string name="btn_show_history">History</string>
+    <string name="default_value">0</string>
 </resources>

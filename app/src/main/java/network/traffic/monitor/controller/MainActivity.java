@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -22,7 +21,8 @@ import androidx.annotation.RequiresApi;
 
 import network.traffic.monitor.R;
 import network.traffic.monitor.model.NetworkTrafficOneMonth;
-import network.traffic.monitor.util.MyBarNameFormatter;
+import network.traffic.monitor.util.DurationManager;
+import network.traffic.monitor.util.NetworkNameTable;
 import network.traffic.monitor.util.MyValueFormatter;
 
 import com.github.mikephil.charting.animation.Easing;
@@ -37,7 +37,7 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 
 
 public class MainActivity extends AppCompatActivity {
-    TextView tvMonth, tvAllTraffic;
+    private TextView tvMonth, tvAllTraffic;
     private HorizontalBarChart horizontalChart;
 
     @Override
@@ -128,16 +128,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNetworkStatistics(){
-        // get network traffic statistics
-        NetworkTrafficOneMonth thisMonthTraffic = new NetworkTrafficOneMonth(MainActivity.this, getTimesMonthMorning(), System.currentTimeMillis());
-
+        // get network traffic statistics of current month
+        NetworkTrafficOneMonth thisMonthTraffic = new NetworkTrafficOneMonth(MainActivity.this, DurationManager.getFirstMomentThisMonth(), System.currentTimeMillis(), 0);
         // display network traffic statistics
         tvMonth.setText(thisMonthTraffic.getMonth());
         tvAllTraffic.setText( MyValueFormatter.getRoundedValueForView(thisMonthTraffic.getTotalTraffic()));
-        initHBarChart(thisMonthTraffic.getTetheringTraffic(), thisMonthTraffic.getWiFiTraffic(), thisMonthTraffic.getMobileTraffic());
+        displayHBarChart(thisMonthTraffic.getTetheringTraffic(), thisMonthTraffic.getWiFiTraffic(), thisMonthTraffic.getMobileTraffic());
     }
 
-    private void setBarDataSet(final ArrayList<BarEntry> entryValue, final ArrayList<BarEntry> entryName, String[] networkType) {
+    private void createHBarChart(final ArrayList<BarEntry> entryValue, final ArrayList<BarEntry> entryName, String[] networkType) {
         // set distance between bars // note: (barWidth+barSpace)*2+groupSpace = 1.0
         float fromX = 0f;
         float barWidth = 0.18f;
@@ -172,10 +171,6 @@ public class MainActivity extends AppCompatActivity {
         barData.setValueTextColor(Color.GRAY);
         barData.setDrawValues(true);
         barData.setBarWidth(barWidth);
-
-        // display types of network traffics beneath bars
-//        IndexAxisValueFormatter formatter = new IndexAxisValueFormatter(new String[]{"","",""});
-//        horizontalChart.getXAxis().setValueFormatter(formatter);
 
         horizontalChart.getXAxis().setDrawLabels(false);
 
@@ -225,9 +220,9 @@ public class MainActivity extends AppCompatActivity {
         YAxis mAxisRight = horizontalChart.getAxisRight();
         mAxisRight.setAxisMinimum(0f);
 
-        //to display all text at the top of bars, bar chart end at 1.5 times of the max bar value
-        mAxisLeft.setAxisMaximum(barData.getYMax()*1.5f);
-        mAxisRight.setAxisMaximum(barData.getYMax()*1.5f);
+        //to display all text at the top of bars, bar chart end at 2 times of the max bar value
+        mAxisLeft.setAxisMaximum(barData.getYMax()*2f);
+        mAxisRight.setAxisMaximum(barData.getYMax()*2f);
 
         // do not display "upper & bottom" y-axis
         mAxisLeft.setEnabled(false);//bottom
@@ -244,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
         horizontalChart.invalidate();
     }
 
-    private void initHBarChart(long tetheringRxTx, long wifiRxTx, long mobileRxTx) {
+    private void displayHBarChart(long tetheringRxTx, long wifiRxTx, long mobileRxTx) {
         final String[] networkType = new String[]{"WiFi", "Tethering", "Mobile"};
 
         ArrayList<BarEntry> entries = new ArrayList<>();
@@ -253,28 +248,20 @@ public class MainActivity extends AppCompatActivity {
         entries.add(new BarEntry(2f, mobileRxTx));
 
         ArrayList<BarEntry> entryName = new ArrayList<>();
-        entryName.add(new BarEntry(0f, MyBarNameFormatter.WiFi));
-        entryName.add(new BarEntry(1f, MyBarNameFormatter.Tethering));
-        entryName.add(new BarEntry(2f, MyBarNameFormatter.Mobile));
+        entryName.add(new BarEntry(0f, NetworkNameTable.WiFi));
+        entryName.add(new BarEntry(1f, NetworkNameTable.Tethering));
+        entryName.add(new BarEntry(2f, NetworkNameTable.Mobile));
 
-        setBarDataSet(entries, entryName, networkType);
+        createHBarChart(entries, entryName, networkType);
     }
 
     // for display bar name 'above' a bar
     private String getNetworkName(float value){
-        if(value== MyBarNameFormatter.WiFi) return "WiFi";
-        if(value== MyBarNameFormatter.Tethering) return "Tethering";
-        if(value== MyBarNameFormatter.Mobile) return "Mobile";
+        if(value== NetworkNameTable.WiFi) return "WiFi";
+        if(value== NetworkNameTable.Tethering) return "Tethering";
+        if(value== NetworkNameTable.Mobile) return "Mobile";
         return "";
     }
-
-    private static long getTimesMonthMorning() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
-        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
-        return cal.getTimeInMillis();
-    }
-
 
     /** Called when the user taps the "History" button */
     public void showHistory(View view) {

@@ -20,4 +20,10 @@ public class MyValueFormatter {
         }
         return text;
     }
+
+    public static String getRoundedValueForLineChart(float value){
+        DecimalFormat df = new DecimalFormat("###");
+        return df.format(value/FileSize.sizeOfGB)+" GB";
+    }
+
 }

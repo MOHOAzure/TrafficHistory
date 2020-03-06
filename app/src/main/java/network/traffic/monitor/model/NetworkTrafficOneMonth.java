@@ -17,11 +17,11 @@ public class NetworkTrafficOneMonth {
     private Context context;
     private NetworkTrafficCollector ntc;
 
-    public NetworkTrafficOneMonth(Context context, long startTime, long endTime){
+    public NetworkTrafficOneMonth(Context context, long startTime, long endTime, int monthOffset){
         this.context = context;
         NetworkTrafficCollector ntc = new NetworkTrafficCollector(context);
 
-        month = setMonth();
+        month = setMonth(monthOffset);
 
         //mobile usage data
         mobile = ntc.getMobileTrafficData(startTime, endTime);
@@ -33,9 +33,11 @@ public class NetworkTrafficOneMonth {
         tethering = ntc.getTetheringTrafficData(startTime, endTime);
     }
 
-    private String setMonth() {
+    private String setMonth(int monthOffset) {
         DateFormat df = new SimpleDateFormat("MMM");
-        return df.format(Calendar.getInstance().getTime());
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, 0-monthOffset);
+        return df.format(cal.getTime());
     }
 
     public String getMonth(){
